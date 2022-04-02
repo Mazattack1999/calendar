@@ -1,11 +1,12 @@
 var hoursList = $(".container");
 var dateText = $("#currentDay");
 var interval;
-var startHour = 9;
-var endHour = 17;
-
+var startHour = 1;
+var endHour = 24;
 var date = moment();
 var hour = date.hour();
+
+// functions 
 
 function startInterval() {
     // update page information every 30 seconds
@@ -15,6 +16,9 @@ function startInterval() {
 }
 
 function createPlanner() {
+    // update dateText
+    updateDateText();
+    
     for (var i = startHour; i <= endHour; i++) {
         // create a row for bootstrap 
         var row = $("<div>").addClass("row").attr("data-hour", i);
@@ -59,7 +63,9 @@ function createPlanner() {
         saveBtn.append(saveIcon);
         // append saveBtn into row
         row.append(saveBtn);
+        
     })
+    
 }
 
 function determineBackgroundColor(section, bgHour) {
@@ -80,6 +86,16 @@ function updatePlanner() {
 }
 
 function updateDateText() {
-    dateText
+    // update date and hour variables
+    date = moment();
+    hour = date.hour();
+
+    // set the text
+    dateText.text(date.format("dddd, MMMM do"));
 }
+
+// event listeners
+
+
 createPlanner();
+startInterval();
