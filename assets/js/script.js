@@ -1,10 +1,12 @@
 var hoursList = $(".container");
 var dateText = $("#currentDay");
 var interval;
-var startHour = 1;
-var endHour = 24;
+var startHour = 9;
+var endHour = 17;
 var date = moment();
 var hour = date.hour();
+
+var descriptions = [];
 
 // functions 
 
@@ -18,6 +20,7 @@ function startInterval() {
 function createPlanner() {
     // update dateText
     updateDateText();
+    loadDescriptions();
     
     for (var i = startHour; i <= endHour; i++) {
         // create a row for bootstrap 
@@ -53,6 +56,11 @@ function createPlanner() {
 
         // append event section
         row.append(eventSection);
+
+        // get section text from descriptions array
+        getSectionText(eventSection);
+        saveDescriptions();
+        // updateEventSection(eventSection);
         
 
         // create save button
@@ -83,19 +91,84 @@ function determineBackgroundColor(section, bgHour) {
 
 function updatePlanner() {
     updateDateText();
+
+    $(".description").each(function(index) {
+        var tempHour = $(this).parent().attr("data-hour");
+        
+        determineBackgroundColor($(this), tempHour);
+    })
 }
 
 function updateDateText() {
     // update date and hour variables
     date = moment();
     hour = date.hour();
+    
 
     // set the text
-    dateText.text(date.format("dddd, MMMM do"));
+    dateText.text(date.format("dddd, MMMM Do"));
+}
+
+// load descriptions on start up
+function loadDescriptions() {
+    // check if descritpions are in local storage
+    if (!localStorage.getItem("descriptions")) {
+        saveDescriptions();
+    } else {
+        descriptions = JSON.parse(localStorage.getItem("descriptions"));
+    }
+}
+
+function saveDescriptions() {
+    // saves all descriptions to local storage
+    localStorage.setItem("descriptions", JSON.stringify(descriptions));
+}
+
+function updateEventSection(section){
+    // get and set section text
+    getSectionText(section);
+    saveDescriptions();
+}
+
+function getSectionText(section){
+    // check if descriptions array has section text
+    var tempHour = section.parent().attr("data-hour");
+
+    for (var i = 0; i < descriptions.length; i++) {
+        if (tempHour === descriptions[i].dHour) {
+            section.val(descriptions[i].description);
+            return;
+        }
+    }
+
+    // if no description is returned, append object
+    descriptions.push({
+        description: section.val(),
+        dHour: tempHour
+    })
+}
+
+function setSectionText(section) {
+    var tempHour = section.parent().attr("data-hour");
+
+    // find correct description index
+    for (var i = 0; i < descriptions.length; i++) {
+        if (tempHour === descriptions[i].dHour) {
+            descriptions[i].description = section.val();
+            return;
+        }
+    }
 }
 
 // event listeners
 
+// when save button is clicked, save description box text to local storage
+$(".container").on("click", ".saveBtn", function(){
+    var eventSection = $(this).parent().children(".description");
+    setSectionText(eventSection);
+    saveDescriptions();
+    
+});
 
 createPlanner();
 startInterval();
